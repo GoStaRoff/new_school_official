@@ -174,21 +174,38 @@ class MainController extends GetxController {
 
   Future downloadFile(
       String url, course_id, cours, video_id, video, cancelToken) async {
+    int CTI = listCanselToken.length - 1;
     print(video);
     Dio dio = Dio();
     try {
       var dir = await getApplicationDocumentsDirectory();
       print(dir);
       print('dir');
-      listValue.add({"rec": 1, "total": 1});
+      listValue.add({
+        "rec": 1,
+        "total": 1,
+        "progress": num.parse((1 / 1).toStringAsFixed(2)),
+        "video": course_id.toString() + video_id.toString(),
+        "download": true,
+        "cancelToken": cancelToken
+      });
       var responce = await dio
           .download(url, "${dir.path}/$course_id/$video_id.mp4",
               onReceiveProgress: (rec, total) async {
-        listValue[listCanselToken.length - 1] = {"rec": rec, "total": total};
+        listValue[CTI] = {
+          "rec": rec,
+          "total": total,
+          "progress": num.parse((rec / total).toStringAsFixed(2)),
+          "video": course_id.toString() + video_id.toString(),
+          "download": true,
+          "cancelToken": cancelToken
+        };
         Get.appUpdate();
         print(listValue);
         if (rec == total) {
-          print("finish donload file ${dir.path}/$course_id/$video_id.mp4");
+          print("finish download file ${dir.path}/$course_id/$video_id.mp4");
+          listValue.removeAt(CTI);
+          listCanselToken.removeAt(CTI);
           var downloads = box.read("downloads");
           var course = box.read("$course_id");
           if (downloads == null) {

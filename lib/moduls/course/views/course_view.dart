@@ -1088,7 +1088,11 @@ class StateItem extends State<Item> {
 
   var value;
 
+  var video;
+
   GetStorage box = GetStorage();
+
+  MainController _mainController = Get.find();
 
   @override
   void initState() {
@@ -1108,6 +1112,15 @@ class StateItem extends State<Item> {
         },
       ),
     );
+    video = {
+      "url": "${widget.lesson['videos'][0]['video_url']}",
+      "course_id": "${widget.lesson['kurs_id']}",
+      "course": widget.homeController.course['kurses'][0],
+      "video_id": "${widget.lesson['id']}",
+      "video": widget.lesson
+    };
+    print(_mainController.listValue);
+    print('listvalue');
   }
 
   @override
@@ -1275,9 +1288,16 @@ class StateItem extends State<Item> {
                         ),
                       ),
                     ),
-                    widget.mainController.auth.value
+                    Obx(() => _mainController.auth.value
                         ? widget.lock
-                            ? false
+                            ? _mainController.listValue
+                                        .where((el) =>
+                                            el["video"] ==
+                                            video['course_id'].toString() +
+                                                video['video_id'].toString())
+                                        .toList()
+                                        .length <=
+                                    0
                                 ? GestureDetector(
                                     child: SvgPicture.asset(
                                       "assets/icons/Layer 16.svg",
@@ -1286,16 +1306,7 @@ class StateItem extends State<Item> {
                                       height: 14,
                                     ),
                                     onTapDown: (_) {
-                                      widget.mainController.controller.add({
-                                        "url":
-                                            "${widget.lesson['videos'][0]['video_url']}",
-                                        "course_id":
-                                            "${widget.lesson['kurs_id']}",
-                                        "course": widget
-                                            .homeController.course['kurses'][0],
-                                        "video_id": "${widget.lesson['id']}",
-                                        "video": widget.lesson
-                                      });
+                                      _mainController.controller.add(video);
                                     },
                                   )
                                 : GestureDetector(
@@ -1304,7 +1315,14 @@ class StateItem extends State<Item> {
                                       height: 20.0,
                                       child: Stack(children: [
                                         CircularProgressIndicator(
-                                          value: 0.4,
+                                          value: _mainController.listValue
+                                              .where((el) =>
+                                                  el["video"] ==
+                                                  video['course_id']
+                                                          .toString() +
+                                                      video['video_id']
+                                                          .toString())
+                                              .toList()[0]['progress'],
                                           backgroundColor: Color(0xFFF9F9F9F9),
                                           strokeWidth: 1.5,
                                         ),
@@ -1317,21 +1335,10 @@ class StateItem extends State<Item> {
                                         ),
                                       ]),
                                     ),
-                                    onTapDown: (_) {
-                                      widget.mainController.controller.add({
-                                        "url":
-                                            "${widget.lesson['videos'][0]['video_url']}",
-                                        "course_id":
-                                            "${widget.lesson['kurs_id']}",
-                                        "course": widget
-                                            .homeController.course['kurses'][0],
-                                        "video_id": "${widget.lesson['id']}",
-                                        "video": widget.lesson
-                                      });
-                                    },
+                                    onTapDown: (_) {},
                                   )
                             : Container()
-                        : Container()
+                        : Container())
                   ],
                 ),
               )
